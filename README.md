@@ -7,7 +7,7 @@
 
 <h3>index : </h3>
 <img src="./uploads/index.png">
-<h3>Sig nup : </h3>
+<h3>Sign up : </h3>
 <img src="./uploads/signup.png">
 <h3>Log in : </h3>
 <img src="./uploads/login.png">
