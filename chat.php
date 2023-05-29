@@ -3,91 +3,26 @@ session_start();
 
 if (isset($_SESSION['loggedIn'], $_SESSION['username'])) {
     require("config/connexion.php");
+    include("config/functions.php");
 
-    $message = '';
+    $username = $_SESSION['username'];
 
-    // Handle form submission
-    if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_POST['fullname']) &&  !empty($_POST['dob']) && !empty($_POST['email']) && !empty($_POST['password']) && !empty($_POST['bio'])) {
-        // Check if the uploaded files are valid
-        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/jfif'];
+    $selUtilisateur = $db->prepare('SELECT * FROM utilisateur WHERE username = :username');
+    $selUtilisateur->bindParam(':username', $username);
+    $selUtilisateur->execute();
 
-        // Handle uploaded profile picture
-        if (!empty($_FILES['profilepic']['name'])) {
-            $name = $_FILES['profilepic']['name'];
-            $target_dir = "uploads/";
-            $target_file = $target_dir . basename($_FILES["profilepic"]["name"]);
+    $query = $db->prepare('SELECT * FROM trends ORDER BY count DESC LIMIT 5');
+    $query->execute();
+    $trends = $query->fetchAll(PDO::FETCH_ASSOC);
 
-            // Select file type
-            $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+    $stmt = $db->prepare("SELECT * FROM utilisateur WHERE username != :current_user");
+    $stmt->execute(['current_user' => $_SESSION['username']]);
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Valid file extensions
-            $extensions_arr = array("jpg", "jpeg", "png", "gif", "jfif");
-
-            // Check extension
-            if (in_array($imageFileType, $extensions_arr)) {
-                // Upload file
-                if (move_uploaded_file($_FILES['profilepic']['tmp_name'], $target_dir . $name)) {
-                    // Convert to base64
-                    $image_base64 = base64_encode(file_get_contents($target_file));
-                    $image = 'data:image/' . $imageFileType . ';base64,' . $image_base64;
-
-                    $stmt = $db->prepare("UPDATE utilisateur SET name = :name, image = :image WHERE username = :session_username");
-                    $stmt->execute([
-                        ':name' => $name, // Use the variable containing the file name
-                        ':image' => $image, // Use the variable containing the image encoded in base64
-                        ':session_username' => $_SESSION['username']
-                    ]);
-
-                    // Display success message for profile picture update
-                    $message = "Profile picture updated successfully.";
-                } else {
-                    $message = "Error uploading profile picture. Please try again later.";
-                }
-            } else {
-                $message = "Invalid file type for profile picture.";
-            }
-        }
-
-        // Update other fields in the database
-        $stmt = $db->prepare("UPDATE utilisateur SET fullname = :fullname, email = :email, password = :password, dob = :dob, bio = :bio WHERE username = :session_username");
-        $stmt->execute([
-
-            ':fullname' => $_POST['fullname'],
-            ':email' => $_POST['email'],
-            ':password' => $_POST['password'],
-            ':dob' => $_POST['dob'],
-            ':bio' => $_POST['bio'],
-            ':session_username' => $_SESSION['username']
-        ]);
-
-        // Display success message for other field updates
-        // $message .= "Profile updated successfully.";
-    }
-
-    // Update follower, following, and publication counts
-    $queryFollowers = "SELECT COUNT(*) AS followerCount FROM followers WHERE follower_user = :username";
-    $stmtFollowers = $db->prepare($queryFollowers);
-    $stmtFollowers->execute([':username' => $_SESSION['username']]);
-    $followerCount = $stmtFollowers->fetchColumn();
-
-    $queryFollowing = "SELECT COUNT(*) AS followingCount FROM followers WHERE username = :username";
-    $stmtFollowing = $db->prepare($queryFollowing);
-    $stmtFollowing->execute([':username' => $_SESSION['username']]);
-    $followingCount = $stmtFollowing->fetchColumn();
-
-    $queryPub = "SELECT COUNT(*) AS publicationCount FROM publication WHERE username = :username";
-    $stmtPub = $db->prepare($queryPub);
-    $stmtPub->execute([':username' => $_SESSION['username']]);
-    $publicationCount = $stmtPub->fetchColumn();
-
-    // Fetch user data from database and display on profile page
-    $stmt = $db->prepare("SELECT * FROM utilisateur WHERE username = :username");
-    $stmt->execute([':username' => $_SESSION['username']]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    $queryT = $db->prepare('SELECT * FROM trends ORDER BY count DESC LIMIT 5');
-    $queryT->execute();
-    $trends = $queryT->fetchAll(PDO::FETCH_ASSOC);
+    $query = "SELECT username FROM followers WHERE follower_user = :currentUsername";
+    $stmt = $db->prepare($query);
+    $stmt->execute([':currentUsername' => $_SESSION['username']]);
+    $followers = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 
 ?>
@@ -101,38 +36,10 @@ if (isset($_SESSION['loggedIn'], $_SESSION['username'])) {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Webtical</title>
         <script src="https://cdn.tailwindcss.com"></script>
-
+        <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css'>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-        <script src="https://use.fontawesome.com/fe459689b4.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="./js/like.js"></script>
-
-        <style>
-            input[type="file"] {
-                /* Remove default styles */
-                appearance: none;
-                -webkit-appearance: none;
-                /* Position off-screen */
-                position: absolute;
-                left: -9999px;
-            }
-
-            .like-btn {
-                background-color: #eee;
-                border: none;
-                padding: 10px;
-                cursor: pointer;
-            }
-
-            .like-btn.active {
-                background-color: #f00;
-                color: #fff;
-            }
-        </style>
-
     </head>
 
     <body>
@@ -212,133 +119,49 @@ if (isset($_SESSION['loggedIn'], $_SESSION['username'])) {
             <div class="basis-1/2 p-4 bg-gray-200 rounded-md shadow-md text-black font-semibold">
                 <div class="flex justify-between">
                     <span class="text-lg font-semibold">
-                        Profile
+                        Friends
                     </span>
-                    <i class="fa-solid fa-user"></i>
+                    <svg fill="currentColor" stroke-width="0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em" class="w-6 h-6" style="overflow: visible;">
+                        <path d="M60.44 389.17c0 .07 0 .2-.08.38.03-.12.05-.25.08-.38ZM439.9 405.6a26.77 26.77 0 0 1-9.59-2l-56.78-20.13-.42-.17a9.88 9.88 0 0 0-3.91-.76 10.32 10.32 0 0 0-3.62.66c-1.38.52-13.81 5.19-26.85 8.77-7.07 1.94-31.68 8.27-51.43 8.27-50.48 0-97.68-19.4-132.89-54.63A183.38 183.38 0 0 1 100.3 215.1a175.9 175.9 0 0 1 4.06-37.58c8.79-40.62 32.07-77.57 65.55-104A194.76 194.76 0 0 1 290.3 32c52.21 0 100.86 20 137 56.18 34.16 34.27 52.88 79.33 52.73 126.87a177.86 177.86 0 0 1-30.3 99.15l-.19.28-.74 1c-.17.23-.34.45-.5.68l-.15.27a21.63 21.63 0 0 0-1.08 2.09l15.74 55.94a26.42 26.42 0 0 1 1.12 7.11 24 24 0 0 1-24.03 24.03Z"></path>
+                        <path d="M299.87 425.39a15.74 15.74 0 0 0-10.29-8.1c-5.78-1.53-12.52-1.27-17.67-1.65a201.78 201.78 0 0 1-128.82-58.75A199.21 199.21 0 0 1 86.4 244.16C85 234.42 85 232 85 232a16 16 0 0 0-28-10.58s-7.88 8.58-11.6 17.19a162.09 162.09 0 0 0 11 150.06C59 393 59 395 58.42 399.5c-2.73 14.11-7.51 39-10 51.91a24 24 0 0 0 8 22.92l.46.39A24.34 24.34 0 0 0 72 480a23.42 23.42 0 0 0 9-1.79l53.51-20.65a8.05 8.05 0 0 1 5.72 0c21.07 7.84 43 12 63.78 12a176 176 0 0 0 74.91-16.66c5.46-2.56 14-5.34 19-11.12a15 15 0 0 0 1.95-16.39Z"></path>
+                    </svg>
                 </div>
-
-                <div class="pt-2"></div>
-
+                <div class="flex pt-2">
+                </div>
                 <div class="pt-2"></div>
                 <div class="border border-gray-400 "></div>
-                <!--content-->
-
-                <!-- post div -->
-                <div id="post" class="p-4 ">
-                    <h1 class="text-2xl font-bold mt-2 mb-4">Edit Profile</h1>
-
-                    <?php if (!empty($message)) : ?>
-                        <div class="bg-teal-100 border-t-4 border-teal-500 rounded-b text-teal-900 px-4 py-3 shadow-md" role="alert">
-                            <div class="flex">
-                                <div class="py-1"><svg class="fill-current h-6 w-6 text-teal-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                        <path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z" />
-                                    </svg></div>
+                <br>
+                <?php if (count($followers) > 0) {
+                    // Step 5: Display or use the retrieved follower usernames as needed
+                    foreach ($followers as $followerUsername) {
+                        $stmt = $db->prepare("SELECT * FROM utilisateur WHERE username = :followerUsername");
+                        $stmt->execute([':followerUsername' => $followerUsername]);
+                        $follower = $stmt->fetch(PDO::FETCH_ASSOC);
+                        if ($follower) { ?>
+                            <div class="flex justify-between space-x-2 p-5">
+                                <div class="flex space-x-2">
+                                    <div>
+                                        <img src="<?= $follower['image'] ?>" alt="" class="rounded-full w-14">
+                                    </div>
+                                    <div class="grid">
+                                        <span class="font-semibold"><?= $follower['fullname'] ?></span>
+                                        <span class="font-thin"><em>@</em><?= $follower['username'] ?></span>
+                                    </div>
+                                </div>
                                 <div>
-
-                                    <p class="font-bold"><?= $message ?></p>
+                                    <div class="flex items-center justify-center">
+                                        <a href="chating.php?recipient=<?= $follower['username'] ?>"><button class="rounded-full text-white bg-violet-500 hover:bg-violet-950 duration-300 h-10 w-20 px-4">Chat</button></a>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    <?php endif; ?>
-                    <br>
-                    <form method="POST" enctype="multipart/form-data" class="">
-                        <div class="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 h-64 border border-gray-400 rounded-xl"></div>
+                            <div class="pt-2"></div>
+                            <div class="border border-gray-200"></div>
 
-                        <div class="flex justify-center border border-gray-400 rounded-lg w-full mx-auto">
-
-                            <div id="postCount" class="flex flex-col items-center">
-                                <span class="font-bold text-xl"><?= $publicationCount ?></span>
-                                <span class="text-gray-600">Posts</span>
-                            </div>
-                            <div id="followerCount" class="flex flex-col items-center mx-4">
-                                <span class="font-bold text-xl"><?= $followerCount ?></span>
-                                <span class="text-gray-600">Followers</span>
-                            </div>
-                            <div id="followingCount" class="flex flex-col items-center">
-                                <span class="font-bold text-xl"><?= $followingCount ?></span>
-                                <span class="text-gray-600">Following</span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="flex items-center  mt-[-8rem]">
-                                <img id="profile-picture" class="w-32 h-32 rounded-full border-2  border-gray-400 cursor-pointer shadow-lg" src="./uploads/<?= htmlspecialchars($user['name']) ?>" alt="Profile picture">
-                                <input type="file" id="profilepic" name="profilepic" accept="image/*" class="hidden">
-                            </div>
-                        </div>
-
-
-                        <br>
-
-                        <div class="mb-4">
-                            <label class="block font-bold">Full Name</label>
-                            <input type="text" name="fullname" value="<?= htmlspecialchars($user['fullname']) ?>" class="block w-96 border-2 focus:border-indigo-500/100 p-2 mt-2 py-3 rounded-full focus:outline-none focus:drop-shadow-xl" placeholder="Full name" required>
-                        </div>
-                        <!-- <div class="mb-4">
-                            <label class="block font-bold">Username</label>
-                            <input type="text" name="username" value="<?= htmlspecialchars($user['username']) ?>" class="block w-96 border-2 focus:border-indigo-500/100 p-2 mt-2 py-3 rounded-full focus:outline-none focus:drop-shadow-xl" placeholder="Username" required>
-                        </div> -->
-                        <div class="mb-4">
-                            <label class="block font-bold">Date of Birth</label>
-                            <input type="date" name="dob" value="<?= htmlspecialchars($user['dob']) ?>" class="block w-96 border-2 focus:border-indigo-500/100 p-2 mt-2 py-3 rounded-full focus:outline-none focus:drop-shadow-xl cursor-pointer " required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="block font-bold">Email</label>
-                            <input type="email" name="email" value="<?= htmlspecialchars($user['email']) ?>" class="block w-96 border-2 focus:border-indigo-500/100 p-2 mt-2 py-3 rounded-full focus:outline-none focus:drop-shadow-xl" placeholder="Email" required>
-                        </div>
-                        <div class="mb-4">
-
-                            <label class="block font-bold">Password</label>
-                            <div class="relative text-gray-600 focus-withi:text-gray-400">
-                                <input type="password" id="password" name="password" class="block w-96 border-2 focus:border-indigo-500/100 p-2 mt-2 py-3 rounded-full focus:outline-none focus:drop-shadow-xl" placeholder="Password" aria-describedby="password-addon" required>
-                                <span class="absolute inset-y-0 left-80 flex items-center pl-2">
-
-                                    <button type="button" id="show-password-btn" class="btn btn-outline-secondary " aria-label="Show password">
-                                        <i class="fa fa-eye text-violet-950 hover:text-violet-600" aria-hidden="true"></i>
-                                    </button>
-                                </span>
-                            </div>
-                        </div>
-
-                        <script>
-                            var passwordInput = document.getElementById("password");
-                            var showPasswordBtn = document.getElementById("show-password-btn");
-
-                            showPasswordBtn.addEventListener("click", function() {
-                                if (passwordInput.type === "password") {
-                                    passwordInput.type = "text";
-                                    showPasswordBtn.innerHTML = '<i class="fa fa-eye-slash text-violet-950 hover:text-violet-600" aria-hidden="true"></i>';
-                                } else {
-                                    passwordInput.type = "password";
-                                    showPasswordBtn.innerHTML = '<i class="fa fa-eye text-violet-950 hover:text-violet-600" aria-hidden="true"></i>';
-                                }
-                            });
-                        </script>
-                        <div class="mb-4">
-                            <label class="block font-bold">Confirm Password</label>
-                            <input type="password" name="confirm_password" class="block w-96 border-2 focus:border-indigo-500/100 p-2 mt-2 py-3 rounded-full focus:outline-none focus:drop-shadow-xl" placeholder="Confirm password">
-                        </div>
-                        <div class="mb-4">
-                            <label class="block font-bold">Bio</label>
-                            <textarea name="bio" class="block w-96 border-2 focus:border-indigo-500/100 p-2 mt-2 py-3 rounded-xl focus:outline-none focus:drop-shadow-xl" placeholder="Write something..."><?= htmlspecialchars($user['bio']) ?></textarea>
-                        </div>
-                        <div>
-                            <button type="submit" class="bg-violet-500 hover:bg-violet-900 duration-300 text-white py-2 mt-2  px-4 rounded-full">Update</button>
-                        </div>
-                    </form>
-                    <script>
-                        var profilePicture = document.getElementById("profile-picture");
-                        var profilePicInput = document.getElementById("profilepic");
-
-                        profilePicture.addEventListener("click", function() {
-                            profilePicInput.click();
-                        });
-                    </script>
-
-                </div>
-                <?php
-                // Close the database connection
-                $pdo = null;
-                ?>
+                    <?php }
+                    }
+                } else { ?>
+                    <p>No utilisateur trouvé</p>
+                <?php } ?>
             </div>
             <!--Webtical trending & search-->
             <div class="basis-1/4 p-4 bg-gray-300 rounded-md shadow-md text-black font-semibold h-fit">
@@ -472,6 +295,7 @@ if (isset($_SESSION['loggedIn'], $_SESSION['username'])) {
                 </div>
             </div>
         </div>
+
     </body>
 
     </html>

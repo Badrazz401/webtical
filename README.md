@@ -19,3 +19,7 @@
 <img src="./uploads/notif.png">
 <h3>Edit Profile : </h3>
 <img src="./uploads/modifprofile.png">
+<h3>Friends : </h3>
+<img src="./uploads/Friends.png">
+<h3>Chats : </h3>
+<img src="./uploads/Chats.png">
