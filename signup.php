@@ -11,7 +11,7 @@ session_start();
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 
-<body style="background-image: url('./img/ttten\ \(1\).svg');
+<body style="background-image: url('./img/tttend.svg');
     
     background-repeat:no-repeat;
     background-size: cover;">
@@ -20,16 +20,20 @@ session_start();
             <div class="col-md-12">
                 <form class="sp" action="./signup.php" enctype="multipart/form-data" method="post">
                     <div class="logo">
-                        <a href="index.php"><img src="./img/LOGO.png"></a>
+                        <a href="index.php" style="text-decoration: none;"><img src="./img/LG.png">
+                            <h2 class="logo-text" style="color: black;font-weight: bold;font-size: 30px">Webtical</h2>
+                        </a>
                     </div>
-                    <h1>Sign up</h1>
+                    <h2 class="signup" style="color: #43ceb0;text-align: center">Sign up</h2>
                     <div class="form-group">
                         <label for="name">Full name</label>
-                        <input type="text" id="name" name="fullname" class="form-control" placeholder="Full name" required>
+                        <input type="text" id="name" name="fullname" class="form-control" placeholder="Full name"
+                            required>
                     </div>
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
+                        <input type="text" id="username" name="username" class="form-control" placeholder="Username"
+                            required>
                     </div>
                     <div class="form-group">
                         <label for="email">Email address</label>
@@ -37,7 +41,8 @@ session_start();
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" class="form-control" minlength="8" placeholder="Password" required>
+                        <input type="password" id="password" name="password" class="form-control" minlength="8"
+                            placeholder="Password" required>
                     </div>
                     <div class="form-group">
                         <label for="dob">Date of birth</label>
@@ -45,7 +50,7 @@ session_start();
                     </div>
                     <div class="form-group">
                         <label for="profilepic">Profile picture</label>
-                        <input type="file" id="profilepic" name="file" accept="image/*" class="form-control-file" >
+                        <input type="file" id="profilepic" name="file" accept="image/*" class="form-control-file">
                     </div>
                     <div class="form-group">
                         <label for="bio">Bio</label>
@@ -97,7 +102,7 @@ session_start();
             $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
             // Valid file extensions
-            $extensions_arr = array("jpg", "jpeg", "png", "gif","jfif");
+            $extensions_arr = array("jpg", "jpeg", "png", "gif", "jfif");
 
             // Check extension
             if (in_array($imageFileType, $extensions_arr)) {
@@ -118,6 +123,10 @@ session_start();
             // Exécution de la requête d'insertion
             if ($stmt->execute()) {
                 // Redirection vers la page de connexion
+                $username = $_POST['username'];
+    
+                $_SESSION['loggedIn'] = true;
+                $_SESSION['username'] = $username;
                 header('Location: home.php');
                 exit();
             } else {

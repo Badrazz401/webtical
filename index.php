@@ -17,7 +17,7 @@
         style="background-image: url('./img/cool.svg');">
         <!--Webtical nav links-->
         <nav class="flex items-center">
-            <a href="#"><img src="./img/LOGO.png" alt="" class="w-24"></a>
+            <a href="#"><img src="./img/LG.png" alt="" class="w-24"><h1 class="text-center font-bold ">Webtical</h1></a>
             <ul class="flex-1 text-center">
                 <!-- <li class="list-none inline-block px-5 "><a href="#"
                         class="no-underline font-sans font-medium  text-gray-800 px-2 hover:text-gray-200 duration-300 "><i
@@ -118,7 +118,7 @@
 
     </div>
     <!--Footer-->
-    <footer class="bg-gray-400 py-4">
+    <footer class="bg-gray-400 py-4 mt-4">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center">
                 <div class="text-black">© 2023 My Website. All rights reserved.</div>

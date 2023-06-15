@@ -1,0 +1,10 @@
+.fixage {
+    position: fixed;
+    top: 0;
+    right: 6%;
+    padding: 16px;
+    width: auto;
+    height: auto;
+    background-color: #D1D5DB;
+    border-radius: 5px;
+}

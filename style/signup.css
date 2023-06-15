@@ -40,11 +40,8 @@ body {
     height: auto;
 }
 
-h1 {
-    text-align: center;
-    font-size: 36px;
-    color: #43ceb0;
-    margin-bottom: 20px;
+h2{
+    color: black;
 }
 
 

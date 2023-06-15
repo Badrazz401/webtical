@@ -47,10 +47,10 @@ if (isset($_POST['ok'])) {
 		}
 
 		body {
-			background-image: url('./img/ttten\ \(1\).svg');
+			background-image: url('./img/tttend.svg');
 			/* background-repeat:space; */
-			/* width: 100vh;
-			height: 100vh; */
+			width: 100%;
+			min-height: 101vh;
 			background-size: cover;
 		}
 
@@ -158,35 +158,43 @@ if (isset($_POST['ok'])) {
 			<div class="col-md-12">
 				<form class="login-form" action="./login.php" method="post">
 					<div class="logo">
-						<a href="index.php">
-						<img src="./img/LOGO.png"></a>
+						<a href="index.php" style="text-decoration:none">
+							<img src="./img/LG.png"><h2 style="color:black;font-weight: bold;font-size: 30px">Webtical</h2></a>
 					</div>
 
 					<h2 class="text-center">Login</h2>
 					<br>
-					<?php if (!empty($message)) : ?>
+					<?php if (!empty($message)): ?>
 						<div class="alert alert-danger" role="alert">
 							<strong class="font-bold">Holy smokes!</strong>
-							<span class=""><?php echo $message; ?></span>
+							<span class="">
+								<?php echo $message; ?>
+							</span>
 						</div>
 					<?php endif; ?>
 					<div class="form-group">
 						<label for="username & E-mail">Username or E-mail address</label>
-						<input type="text" class="form-control" id="username" name="username" placeholder="Enter username or E-mail">
+						<input type="text" class="form-control" id="username" name="username"
+							placeholder="Enter username or E-mail" required/>
 					</div>
-					<div class="form-group">
+					<div class="form-group position-relative">
 						<label for="password">Password</label>
-						<div class="password-toggle">
-							<input type="password" class="form-control" name="password" id="password" placeholder="Enter password" >
-							<span class="toggle-password" onclick="togglePasswordVisibility()" style="margin-left:10px;margin: 10px;"><i class="fa fa-eye"></i></span>
+						<div class="password-toggle ">
+							<input type="password" class="form-control" name="password" id="password"
+								placeholder="Enter password" required/>
+							<span class="toggle-password position-absolute" style="top: 40px;right: 10px">
+								<i class="fa fa-eye "  onclick="togglePasswordVisibility()"></i>
+							</span>
 						</div>
 					</div>
 
+
 					<div class="form-group form-check">
-						<input type="checkbox" class="form-check-input" id="remember-me">
+						<input type="checkbox" class="form-check-input" id="remember-me" />
 						<label class="form-check-label" for="remember-me">Remember me</label>
 					</div>
-					<button type="submit" name="ok" class="btn btn-primary btn-block"><i class="fas fa-sign-in-alt"></i>Login</button>
+					<button type="submit" name="ok" class="btn btn-primary btn-block"><i
+							class="fas fa-sign-in-alt"></i>Login</button>
 					<a href="#" class="forgot-password">Forgot Password?</a>
 					<a href="./signup.php" class="create-account">Create New Account</a>
 					<script>
@@ -212,8 +220,12 @@ if (isset($_POST['ok'])) {
 
 
 	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-zML4GHUv7VW4O8sydSyLqb//LeIo16v7MmH8C9P9oavNbYfj+zAwKLWTRerHr2Cz" crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js" integrity="sha384-q8i/X9YF+20GdOSKk57NkKj0EwUNlGwR/qlZfjKWHpX9+MGBbE98s1mHMc/KJ8Qr" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"
+		integrity="sha384-zML4GHUv7VW4O8sydSyLqb//LeIo16v7MmH8C9P9oavNbYfj+zAwKLWTRerHr2Cz"
+		crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.min.js"
+		integrity="sha384-q8i/X9YF+20GdOSKk57NkKj0EwUNlGwR/qlZfjKWHpX9+MGBbE98s1mHMc/KJ8Qr"
+		crossorigin="anonymous"></script>
 
 </body>
 

@@ -275,3 +275,24 @@ a {
 /* END: Right column*/
 
 /* END: Main content elements' styles */
+
+/* Styles for larger screens */
+.sidebar {
+  width: 300px;
+  float: left;
+}
+
+.main-content {
+  margin-left: 320px; /* Account for sidebar width and spacing */
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none; /* Hide the sidebar */
+  }
+  
+  .main-content {
+    margin-left: 0; /* Reset margin for full width */
+  }
+}

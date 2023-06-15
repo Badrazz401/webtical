@@ -4,9 +4,10 @@ if (isset($_POST['ok'])) {
     require("./config/connexion.php");
 
     // Get the post data from the form
+    
     $content = $_POST['content'];
     $username = $_POST['username'];
-    $image = null;
+    $image = NULL;
 
     // Check if an image was uploaded
     if (isset($_FILES['image'])) {
@@ -23,7 +24,8 @@ if (isset($_POST['ok'])) {
         $insert_post->bindParam(':contenuPub', $content);
         $insert_post->bindParam(':image', $image);
         $insert_post->execute();
-        header('Location: home.php');
+        echo '<script>window.location.href = document.referrer;</script>';
+        // header('Location: home.php');
     } catch (PDOException $e) {
         echo 'Error: ' . $e->getMessage();
     }
